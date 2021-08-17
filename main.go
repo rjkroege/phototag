@@ -47,8 +47,6 @@ func parseJsonFile(fd io.Reader) ([]LocationSample, error) {
 func convertFormat(recs []LocationSample, starttime, endtime time.Time) []LocationValue {
 	processed := make([]LocationValue, 0, len(recs))
 
-	log.Println(starttime, endtime)
-
 	for i, ls := range recs {
 		// Time
 		ts, err := strconv.ParseInt(ls.TimestampMs, 10, 64)
@@ -98,10 +96,9 @@ func parseDateRange(dr string) (time.Time, time.Time, error) {
 }
 
 var daterange = flag.String("d", "19000101-21001231", "[year month date - year month date) e.g. 20170101-20171241")
+var verbose = flag.Bool("v", false, "verbose output for debugging")
 
 func main() {
-	log.Println("hello")
-
 	// Setup options before calling Parse()
 	flag.Parse()
 
@@ -109,11 +106,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(starttime.String(), endtime.String())
+	if *verbose {
+		log.Println(starttime.String(), endtime.String())
+	}
 
 	// for each arg
 	for _, f := range flag.Args() {
-		log.Println(f)
 		fd, err := os.Open(f)
 		if err != nil {
 			log.Printf("can't open %q: %v", f, err)
@@ -128,15 +126,19 @@ func main() {
 		}
 		fd.Close()
 
-		for i := 0; i < 10 && i < len(recs); i++ {
-			log.Println(i, recs[i])
+		if *verbose {
+			for i := 0; i < 10 && i < len(recs); i++ {
+				log.Println(i, recs[i])
+			}
 		}
 
 		locations := convertFormat(recs, starttime, endtime)
 
-		for i, loc := range locations {
-			if loc.timestamp.After(starttime) && loc.timestamp.Before(endtime) {
-				log.Printf("[%d] %s %f %f", i, loc.timestamp.String(), loc.latitude, loc.longitude)
+		if *verbose {
+			for i, loc := range locations {
+				if loc.timestamp.After(starttime) && loc.timestamp.Before(endtime) {
+					log.Printf("[%d] %s %f %f", i, loc.timestamp.String(), loc.latitude, loc.longitude)
+				}
 			}
 		}
 
