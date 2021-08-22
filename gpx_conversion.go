@@ -15,7 +15,7 @@ type TrkPoint struct {
 	XMLName   xml.Name `xml:"trkpt"`
 	Latitude float64 `xml:"lat,attr"`
 	Longitude float64 `xml:"lon,attr"`
-	Timestamp time.Time `xml:"time"`
+	Timestamp string `xml:"time"`
 	Name string `xml:"name"`
 }
 
@@ -29,7 +29,7 @@ type BoundingRect struct {
 
 type Gpx struct {
 	XMLName   xml.Name `xml:"gpx"`
-	Timestamp time.Time `xml:"time"`
+	Timestamp string `xml:"time"`
 	Version string `xml:"version,attr"`
 	Creator string `xml:"creator,attr"`
 	Namespace string `xml:"xmlns,attr"`
@@ -68,8 +68,7 @@ func convertToGpx(ofd io.Writer, locs []LocationValue, starttime, endtime time.T
 			points = append(points, TrkPoint{
 				Latitude: loc.latitude,
 				Longitude: loc.longitude,
-				// TODO(rjk): format the timestamp correctly
-				Timestamp: loc.timestamp,
+				Timestamp: loc.timestamp.UTC().Format(time.RFC3339Nano),
 				Name: fmt.Sprintf("WPT.%d", i),
 			})
 
@@ -80,7 +79,7 @@ func convertToGpx(ofd io.Writer, locs []LocationValue, starttime, endtime time.T
 	// TODO(rjk): probably do more stuffs
 
 	gpx := Gpx{
-		Timestamp: time.Now(),
+		Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
 		Version: "1.0",
 		Creator: "phototag",
 		Namespace: "http://www.topografix.com/GPX/1/0",
