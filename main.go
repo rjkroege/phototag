@@ -96,6 +96,7 @@ func parseDateRange(dr string) (time.Time, time.Time, error) {
 
 var daterange = flag.String("d", "19000101-21001231", "[year month date - year month date) e.g. 20170101-20171241")
 var verbose = flag.Bool("v", false, "verbose output for debugging")
+var gencsv = flag.Bool("csv", false, "Emit CSV instead of GPX")
 
 func main() {
 	// Setup options before calling Parse()
@@ -141,29 +142,26 @@ func main() {
 			}
 		}
 
-		//		of := f + ".csv"
 		of := f + ".gpx"
+		convert := convertToGpx
+		op := "convertToGpx"
+		if *gencsv {
+			of = f + ".csv"
+			convert = convertToCsv
+			op = "convertToGpx"
+		}
+
 		ofd, err := os.Create(of)
 		if err != nil {
 			log.Printf("can't open output %q: %v", of, err)
 			continue
 		}
 
-		// TODO(rjk): control via CLI
-		/*
-			if err := convertToCsv(ofd, locations, starttime, endtime); err != nil {
-				log.Println("convertToCsv failed:", err)
-				ofd.Close()
-				continue
-			}
-		*/
-
-		if err := convertToGpx(ofd, locations, starttime, endtime); err != nil {
-			log.Println("convertToGpx failed:", err)
+		if err := convert(ofd, locations, starttime, endtime); err != nil {
+			log.Println("%s failed:", op, err)
 			ofd.Close()
 			continue
 		}
 		ofd.Close()
 	}
-
 }
