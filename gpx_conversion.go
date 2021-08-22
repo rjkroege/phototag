@@ -7,34 +7,34 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"time"
 	"math"
+	"time"
 )
 
 type TrkPoint struct {
 	XMLName   xml.Name `xml:"trkpt"`
-	Latitude float64 `xml:"lat,attr"`
-	Longitude float64 `xml:"lon,attr"`
-	Timestamp string `xml:"time"`
-	Name string `xml:"name"`
+	Latitude  float64  `xml:"lat,attr"`
+	Longitude float64  `xml:"lon,attr"`
+	Timestamp string   `xml:"time"`
+	Name      string   `xml:"name"`
 }
 
 type BoundingRect struct {
-	XMLName   xml.Name `xml:"bounds"`
-	MinLat float64 `xml:"minlat,attr"`
-	MinLong float64 `xml:"minlon,attr"`
-	MaxLat float64 `xml:"maxlat,attr"`
-	MaxLong float64 `xml:"maxlon,attr"`
+	XMLName xml.Name `xml:"bounds"`
+	MinLat  float64  `xml:"minlat,attr"`
+	MinLong float64  `xml:"minlon,attr"`
+	MaxLat  float64  `xml:"maxlat,attr"`
+	MaxLong float64  `xml:"maxlon,attr"`
 }
 
 type Gpx struct {
-	XMLName   xml.Name `xml:"gpx"`
-	Timestamp string `xml:"time"`
-	Version string `xml:"version,attr"`
-	Creator string `xml:"creator,attr"`
-	Namespace string `xml:"xmlns,attr"`
-	Bounds BoundingRect `xml:"bounds"`
-	Points []TrkPoint `xml:"trk>trkseg>trkpt"`
+	XMLName   xml.Name     `xml:"gpx"`
+	Timestamp string       `xml:"time"`
+	Version   string       `xml:"version,attr"`
+	Creator   string       `xml:"creator,attr"`
+	Namespace string       `xml:"xmlns,attr"`
+	Bounds    BoundingRect `xml:"bounds"`
+	Points    []TrkPoint   `xml:"trk>trkseg>trkpt"`
 }
 
 func (br *BoundingRect) update(lat, long float64) {
@@ -52,12 +52,11 @@ func convertToGpx(ofd io.Writer, locs []LocationValue, starttime, endtime time.T
 	gpxout := xml.NewEncoder(ofd)
 	gpxout.Indent("", "	")
 
-
 	points := make([]TrkPoint, 0)
-	 bounds := BoundingRect{
-		MinLat: math.MaxFloat64,
-		MinLong:  math.MaxFloat64,
-		MaxLat: -math.MaxFloat64,
+	bounds := BoundingRect{
+		MinLat:  math.MaxFloat64,
+		MinLong: math.MaxFloat64,
+		MaxLat:  -math.MaxFloat64,
 		MaxLong: -math.MaxFloat64,
 	}
 
@@ -66,10 +65,10 @@ func convertToGpx(ofd io.Writer, locs []LocationValue, starttime, endtime time.T
 
 			// do stuffs
 			points = append(points, TrkPoint{
-				Latitude: loc.latitude,
+				Latitude:  loc.latitude,
 				Longitude: loc.longitude,
 				Timestamp: loc.timestamp.UTC().Format(time.RFC3339Nano),
-				Name: fmt.Sprintf("WPT.%d", i),
+				Name:      fmt.Sprintf("WPT.%d", i),
 			})
 
 			bounds.update(loc.latitude, loc.longitude)
@@ -80,11 +79,11 @@ func convertToGpx(ofd io.Writer, locs []LocationValue, starttime, endtime time.T
 
 	gpx := Gpx{
 		Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
-		Version: "1.0",
-		Creator: "phototag",
+		Version:   "1.0",
+		Creator:   "phototag",
 		Namespace: "http://www.topografix.com/GPX/1/0",
-		Bounds: bounds,
-		Points: points,
+		Bounds:    bounds,
+		Points:    points,
 	}
 
 	if err := gpxout.Encode(gpx); err != nil {
@@ -93,7 +92,6 @@ func convertToGpx(ofd io.Writer, locs []LocationValue, starttime, endtime time.T
 
 	return nil
 }
-
 
 /*
 

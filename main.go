@@ -141,7 +141,7 @@ func main() {
 			}
 		}
 
-//		of := f + ".csv"
+		//		of := f + ".csv"
 		of := f + ".gpx"
 		ofd, err := os.Create(of)
 		if err != nil {
@@ -150,14 +150,14 @@ func main() {
 		}
 
 		// TODO(rjk): control via CLI
-/*
-		if err := convertToCsv(ofd, locations, starttime, endtime); err != nil {
-			log.Println("convertToCsv failed:", err)
-			ofd.Close()
-			continue
-		}
-*/
-		
+		/*
+			if err := convertToCsv(ofd, locations, starttime, endtime); err != nil {
+				log.Println("convertToCsv failed:", err)
+				ofd.Close()
+				continue
+			}
+		*/
+
 		if err := convertToGpx(ofd, locations, starttime, endtime); err != nil {
 			log.Println("convertToGpx failed:", err)
 			ofd.Close()
@@ -167,4 +167,3 @@ func main() {
 	}
 
 }
-
